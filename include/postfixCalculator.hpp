@@ -2,21 +2,28 @@
 #define POSTFIXCALCULATOR_H
 
 #include <string>
+#include <stack>
+#include <optional>
 using namespace std;
 
 class PostfixCalculator
 {
 public:
-    PostfixCalculator();
+    stack<double> operandStack;
 
-    double evaluate(const string &expression);
+    PostfixCalculator();
+    PostfixCalculator(string &expression);
+
+    void clear();
+    void visualize();
+    void handle(string &expression);
 
 private:
-    bool isOperand(const string &token);
+    bool isOperand(string &token);
+    bool isOperator(string &token);
 
-    bool isOperator(const string &token);
-
-    double performOperation(double operand1, double operand2, const string &op);
+    optional<double> calculate(string &expression);
+    optional<double> performOperation(double operand1, double operand2, string &op);
 };
 
 #endif

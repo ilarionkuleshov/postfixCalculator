@@ -1,102 +1,134 @@
 #include <iostream>
-#include <stack>
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <vector>
 
 #include "postfixCalculator.hpp"
 
 PostfixCalculator::PostfixCalculator() {}
+PostfixCalculator::PostfixCalculator(string &expression)
+{
+}
 
-double PostfixCalculator::evaluate(const string &expression)
+void PostfixCalculator::clear()
+{
+    while (!this->operandStack.empty())
+        this->operandStack.pop();
+    cout << "Done!\n"
+         << endl;
+}
+
+void PostfixCalculator::handle(string &expression)
+{
+    optional<double> result = this->calculate(expression);
+    if (result.has_value())
+        cout << "Last stack element: " << result.value() << endl;
+    cout << endl;
+}
+
+optional<double> PostfixCalculator::calculate(string &expression)
 {
     istringstream iss(expression);
     string token;
-    stack<double> operandStack;
 
     while (iss >> token)
     {
-        if (isOperand(token))
+        if (this->isOperand(token))
         {
             double operand = stod(token);
-            operandStack.push(operand);
+            this->operandStack.push(operand);
         }
-        else if (isOperator(token))
+        else if (this->isOperator(token))
         {
-            if (operandStack.size() < 2)
+            if (this->operandStack.size() < 2)
             {
-                cerr << "Invalid postfix expression." << endl;
-                return 0.0;
+                cerr << "Not enough operands to operate with!" << endl;
+                continue;
             }
-            double operand2 = operandStack.top();
-            operandStack.pop();
-            double operand1 = operandStack.top();
-            operandStack.pop();
+            double operand2 = this->operandStack.top();
+            this->operandStack.pop();
+            double operand1 = this->operandStack.top();
 
-            double result = performOperation(operand1, operand2, token);
-            operandStack.push(result);
+            this->operandStack.push(operand2);
+
+            optional<double> result = this->performOperation(operand1, operand2, token);
+            if (result.has_value())
+            {
+                this->operandStack.pop();
+                this->operandStack.pop();
+                this->operandStack.push(result.value());
+            }
         }
         else
         {
             cerr << "Invalid token: " << token << endl;
-            return 0.0;
+            continue;
         }
     }
 
-    if (operandStack.size() == 1)
-    {
-        return operandStack.top();
-    }
-    else
-    {
-        cerr << "Invalid postfix expression." << endl;
-        return 0.0;
-    }
+    if (!this->operandStack.empty())
+        return this->operandStack.top();
+
+    return nullopt;
 }
 
-bool PostfixCalculator::isOperand(const string &token)
+void PostfixCalculator::visualize()
+{
+    stack<double> tempStack = this->operandStack;
+    vector<double> stackElements;
+
+    while (!tempStack.empty())
+    {
+        stackElements.push_back(tempStack.top());
+        tempStack.pop();
+    }
+
+    cout << "Current stack: [";
+
+    for (int i = stackElements.size() - 1; i >= 0; i--)
+    {
+        cout << stackElements[i];
+        if (i != 0)
+            cout << ", ";
+    }
+
+    cout << "]\n"
+         << endl;
+}
+
+bool PostfixCalculator::isOperand(string &token)
 {
     try
     {
         stod(token);
         return true;
     }
-    catch (const invalid_argument &)
+    catch (invalid_argument &)
     {
         return false;
     }
 }
 
-bool PostfixCalculator::isOperator(const string &token)
+bool PostfixCalculator::isOperator(string &token)
 {
     return token == "+" || token == "-" || token == "*" || token == "/";
 }
 
-double PostfixCalculator::performOperation(double operand1, double operand2, const string &op)
+optional<double> PostfixCalculator::performOperation(double operand1, double operand2, string &op)
 {
     if (op == "+")
-    {
         return operand1 + operand2;
-    }
     else if (op == "-")
-    {
         return operand1 - operand2;
-    }
     else if (op == "*")
-    {
         return operand1 * operand2;
-    }
     else if (op == "/")
     {
         if (operand2 != 0)
-        {
             return operand1 / operand2;
-        }
         else
-        {
-            cerr << "Division by zero." << endl;
-            return 0.0;
-        }
+            cerr << "Division by zero is not allowed." << endl;
     }
-    return 0.0;
+    return nullopt;
 }
