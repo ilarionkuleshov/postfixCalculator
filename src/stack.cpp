@@ -12,6 +12,31 @@ Stack::Stack(const string &expression)
     this->handle(expression);
 }
 
+Stack::Stack(const Stack &otherStack)
+{
+    this->elements = otherStack.elements;
+}
+
+double &Stack::operator[](size_t index)
+{
+    if (index < this->elements.size())
+        return this->elements[this->elements.size() - 1 - index];
+    else
+        throw std::out_of_range("Index out of range");
+}
+
+Stack &Stack::operator=(const Stack &otherStack)
+{
+    if (this != &otherStack)
+        this->elements = otherStack.elements;
+    return *this;
+}
+
+vector<double> *Stack::operator->()
+{
+    return &this->elements;
+}
+
 void Stack::clear()
 {
     this->elements.clear();

@@ -11,10 +11,15 @@ class Stack
 public:
     Stack();
     Stack(const string &expression);
+    Stack(const Stack &otherStack);
 
     void clear();
     void visualize();
     void handle(const string &expression);
+
+    double &operator[](size_t index);
+    Stack &operator=(const Stack &otherStack);
+    vector<double> *operator->();
 
 private:
     vector<double> elements;

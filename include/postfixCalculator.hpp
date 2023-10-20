@@ -23,6 +23,8 @@ private:
     void createNewStack();
     void removeStack();
     void operateStack();
+    void equateStacks();
+    void getStackElement(int stackId);
     optional<int> getValidatedStackId(const string &details);
 };
 

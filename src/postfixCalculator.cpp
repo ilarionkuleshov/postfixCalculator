@@ -32,6 +32,7 @@ int PostfixCalculator::run()
                  << "'l': Display a list of existing stacks.\n"
                  << "'n': Create new stack.\n"
                  << "'r': Remove specific stack.\n"
+                 << "'e': Equate one stack to another.\n"
                  << "'o': Choose specific stack to operate with.\n"
                  << endl;
         }
@@ -41,11 +42,29 @@ int PostfixCalculator::run()
             this->createNewStack();
         else if (prompt == "r")
             this->removeStack();
+        else if (prompt == "e")
+            this->equateStacks();
         else if (prompt == "o")
             this->operateStack();
     }
 
     return 0;
+}
+
+void PostfixCalculator::equateStacks()
+{
+    optional<int> stackId1 = this->getValidatedStackId("to which you want to replace the values");
+    if (!stackId1.has_value())
+        return;
+
+    optional<int> stackId2 = this->getValidatedStackId("from which you want to take the values");
+    if (!stackId2.has_value())
+        return;
+
+    this->stacks[stackId1.value()] = this->stacks[stackId2.value()];
+
+    cout << endl;
+    this->printStacks();
 }
 
 void PostfixCalculator::operateStack()
@@ -72,6 +91,7 @@ void PostfixCalculator::operateStack()
                  << "'h': Display a list of available commands (help).\n"
                  << "'b': Go back to main menu.\n"
                  << "'v': Visualize the current stack.\n"
+                 << "'g': Get specific element of the current stack.\n"
                  << "<expression>: Handle <expression> for the current stack (numbers and operators).\n"
                  << endl;
         }
@@ -80,6 +100,8 @@ void PostfixCalculator::operateStack()
             this->stacks[stackId.value()].visualize();
             cout << endl;
         }
+        else if (prompt == "g")
+            this->getStackElement(stackId.value());
         else
         {
             this->stacks[stackId.value()].handle(prompt);
@@ -88,6 +110,26 @@ void PostfixCalculator::operateStack()
         }
     }
     cout << endl;
+}
+
+void PostfixCalculator::getStackElement(int stackId)
+{
+    cout << "Enter ID of the stack element to get: ";
+
+    string rawElementId;
+    getline(cin, rawElementId);
+
+    try
+    {
+        int elementId = stoi(rawElementId);
+        cout << this->stacks[stackId][elementId] << endl
+             << endl;
+    }
+    catch (const exception &e)
+    {
+        cerr << "Invalid ID specified!\n"
+             << endl;
+    }
 }
 
 void PostfixCalculator::printStacks()
