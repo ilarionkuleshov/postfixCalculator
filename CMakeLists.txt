@@ -4,6 +4,7 @@ project(postfixCalculator VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(SOURCES
     src/main.cpp
+    src/stack.cpp
     src/postfixCalculator.cpp
 )
 

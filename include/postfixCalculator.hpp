@@ -1,29 +1,29 @@
 #ifndef POSTFIXCALCULATOR_H
 #define POSTFIXCALCULATOR_H
 
+#include <vector>
 #include <string>
-#include <stack>
 #include <optional>
+#include "stack.hpp"
+
 using namespace std;
 
 class PostfixCalculator
 {
 public:
-    stack<double> operandStack;
-
     PostfixCalculator();
-    PostfixCalculator(string &expression);
 
-    void clear();
-    void visualize();
-    void handle(string &expression);
+    int run();
 
 private:
-    bool isOperand(string &token);
-    bool isOperator(string &token);
+    vector<Stack> stacks;
+    int stackCounter;
 
-    optional<double> calculate(string &expression);
-    optional<double> performOperation(double operand1, double operand2, string &op);
+    void printStacks();
+    void createNewStack();
+    void removeStack();
+    void operateStack();
+    optional<int> getValidatedStackId(const string &details);
 };
 
 #endif

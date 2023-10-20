@@ -1,134 +1,161 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <cmath>
-#include <vector>
 
+#include "stack.hpp"
 #include "postfixCalculator.hpp"
 
-PostfixCalculator::PostfixCalculator() {}
-PostfixCalculator::PostfixCalculator(string &expression)
+PostfixCalculator::PostfixCalculator()
 {
+    Stack initialStack;
+    this->stacks.push_back(initialStack);
 }
 
-void PostfixCalculator::clear()
+int PostfixCalculator::run()
 {
-    while (!this->operandStack.empty())
-        this->operandStack.pop();
-    cout << "Done!\n"
+    string prompt;
+
+    cout << "Welcome to PostfixCalculator!\n"
+         << "Enter 'h' for help.\n"
          << endl;
+
+    while (prompt != "q")
+    {
+        cout << ">>> ";
+        getline(cin, prompt);
+
+        if (prompt.empty() || prompt == "q")
+            continue;
+        else if (prompt == "h")
+        {
+            cout << "Available commands:\n"
+                 << "'h': Display a list of available commands (help).\n"
+                 << "'q': Quit the program.\n"
+                 << "'l': Display a list of existing stacks.\n"
+                 << "'n': Create new stack.\n"
+                 << "'r': Remove specific stack.\n"
+                 << "'o': Choose specific stack to operate with.\n"
+                 << endl;
+        }
+        else if (prompt == "l")
+            this->printStacks();
+        else if (prompt == "n")
+            this->createNewStack();
+        else if (prompt == "r")
+            this->removeStack();
+        else if (prompt == "o")
+            this->operateStack();
+    }
+
+    return 0;
 }
 
-void PostfixCalculator::handle(string &expression)
+void PostfixCalculator::operateStack()
 {
-    optional<double> result = this->calculate(expression);
-    if (result.has_value())
-        cout << "Last stack element: " << result.value() << endl;
+    optional<int> stackId = this->getValidatedStackId("to operate with");
+
+    if (!stackId.has_value())
+        return;
+
+    string prompt;
+    cout << endl;
+
+    while (prompt != "b")
+    {
+        cout << "(stack " << stackId.value() << ") "
+             << ">>> ";
+        getline(cin, prompt);
+
+        if (prompt.empty() || prompt == "b")
+            continue;
+        else if (prompt == "h")
+        {
+            cout << "Available commands (for stack " << stackId.value() << "):\n"
+                 << "'h': Display a list of available commands (help).\n"
+                 << "'b': Go back to main menu.\n"
+                 << "'v': Visualize the current stack.\n"
+                 << "<expression>: Handle <expression> for the current stack (numbers and operators).\n"
+                 << endl;
+        }
+        else if (prompt == "v")
+        {
+            this->stacks[stackId.value()].visualize();
+            cout << endl;
+        }
+        else
+        {
+            this->stacks[stackId.value()].handle(prompt);
+            this->stacks[stackId.value()].visualize();
+            cout << endl;
+        }
+    }
     cout << endl;
 }
 
-optional<double> PostfixCalculator::calculate(string &expression)
+void PostfixCalculator::printStacks()
 {
-    istringstream iss(expression);
-    string token;
-
-    while (iss >> token)
+    if (this->stacks.empty())
     {
-        if (this->isOperand(token))
-        {
-            double operand = stod(token);
-            this->operandStack.push(operand);
-        }
-        else if (this->isOperator(token))
-        {
-            if (this->operandStack.size() < 2)
-            {
-                cerr << "Not enough operands to operate with!" << endl;
-                continue;
-            }
-            double operand2 = this->operandStack.top();
-            this->operandStack.pop();
-            double operand1 = this->operandStack.top();
-
-            this->operandStack.push(operand2);
-
-            optional<double> result = this->performOperation(operand1, operand2, token);
-            if (result.has_value())
-            {
-                this->operandStack.pop();
-                this->operandStack.pop();
-                this->operandStack.push(result.value());
-            }
-        }
-        else
-        {
-            cerr << "Invalid token: " << token << endl;
-            continue;
-        }
+        cout << "There are no stacks! To create one, enter 'n'.\n"
+             << endl;
+        return;
     }
 
-    if (!this->operandStack.empty())
-        return this->operandStack.top();
-
-    return nullopt;
+    cout << "Existing stacks:" << endl;
+    for (int i = 0; i < this->stacks.size(); i++)
+    {
+        cout << "Stack (" << i << "): ";
+        this->stacks[i].visualize();
+    }
+    cout << endl;
 }
 
-void PostfixCalculator::visualize()
+void PostfixCalculator::createNewStack()
 {
-    stack<double> tempStack = this->operandStack;
-    vector<double> stackElements;
+    string expression;
 
-    while (!tempStack.empty())
-    {
-        stackElements.push_back(tempStack.top());
-        tempStack.pop();
-    }
+    cout << "If you want, enter the starting expression for the stack: ";
+    getline(cin, expression);
 
-    cout << "Current stack: [";
+    Stack newStack(expression);
 
-    for (int i = stackElements.size() - 1; i >= 0; i--)
-    {
-        cout << stackElements[i];
-        if (i != 0)
-            cout << ", ";
-    }
+    this->stacks.push_back(newStack);
 
-    cout << "]\n"
-         << endl;
+    cout << "Stack (" << this->stacks.size() - 1 << "): ";
+    newStack.visualize();
+
+    cout << endl;
 }
 
-bool PostfixCalculator::isOperand(string &token)
+void PostfixCalculator::removeStack()
 {
+    optional<int> stackId = this->getValidatedStackId("to remove");
+
+    if (stackId.has_value())
+    {
+        this->stacks.erase(this->stacks.begin() + stackId.value());
+        cout << "Done!\n"
+             << endl;
+    }
+}
+
+optional<int> PostfixCalculator::getValidatedStackId(const string &details)
+{
+    string rawStackId;
+
+    cout << "Enter ID of the stack " << details << ": ";
+    getline(cin, rawStackId);
+
     try
     {
-        stod(token);
-        return true;
-    }
-    catch (invalid_argument &)
-    {
-        return false;
-    }
-}
+        int stackId = stoi(rawStackId);
+        if (stackId < 0 || stackId >= this->stacks.size())
+            throw invalid_argument("");
 
-bool PostfixCalculator::isOperator(string &token)
-{
-    return token == "+" || token == "-" || token == "*" || token == "/";
-}
-
-optional<double> PostfixCalculator::performOperation(double operand1, double operand2, string &op)
-{
-    if (op == "+")
-        return operand1 + operand2;
-    else if (op == "-")
-        return operand1 - operand2;
-    else if (op == "*")
-        return operand1 * operand2;
-    else if (op == "/")
+        return stackId;
+    }
+    catch (const exception &e)
     {
-        if (operand2 != 0)
-            return operand1 / operand2;
-        else
-            cerr << "Division by zero is not allowed." << endl;
+        cerr << "Invalid ID specified!\n"
+             << endl;
     }
     return nullopt;
 }
