@@ -91,6 +91,9 @@ void PostfixCalculator::operateStack()
                  << "'h': Display a list of available commands (help).\n"
                  << "'b': Go back to main menu.\n"
                  << "'v': Visualize the current stack.\n"
+                 << "'c': Clear the current stack.\n"
+                 << "'s': Save stack elements to file.\n"
+                 << "'l': Load stack elements from file.\n"
                  << "'g': Get specific element of the current stack.\n"
                  << "<expression>: Handle <expression> for the current stack (numbers and operators).\n"
                  << endl;
@@ -99,6 +102,22 @@ void PostfixCalculator::operateStack()
         {
             this->stacks[stackId.value()].visualize();
             cout << endl;
+        }
+        else if (prompt == "c")
+        {
+            this->stacks[stackId.value()].clear();
+            this->stacks[stackId.value()].visualize();
+            cout << endl;
+        }
+        else if (prompt == "s")
+        {
+            string operation = "save";
+            this->saveOrLoadStack(stackId.value(), operation);
+        }
+        else if (prompt == "l")
+        {
+            string operation = "load";
+            this->saveOrLoadStack(stackId.value(), operation);
         }
         else if (prompt == "g")
             this->getStackElement(stackId.value());
@@ -110,6 +129,32 @@ void PostfixCalculator::operateStack()
         }
     }
     cout << endl;
+}
+
+void PostfixCalculator::saveOrLoadStack(int stackId, string &operation)
+{
+    if (operation != "save" && operation != "load")
+        throw invalid_argument("Argument `operation` must be `save` or `load`");
+
+    cout << "Enter file path to " << operation << " stack: ";
+
+    string filePath;
+    getline(cin, filePath);
+
+    try
+    {
+        if (operation == "save")
+            this->stacks[stackId].saveToFile(filePath);
+        else
+            this->stacks[stackId].loadFromFile(filePath);
+
+        this->stacks[stackId].visualize();
+        cout << endl;
+    }
+    catch (const runtime_error &error)
+    {
+        cerr << error.what() << endl;
+    }
 }
 
 void PostfixCalculator::getStackElement(int stackId)
@@ -125,7 +170,7 @@ void PostfixCalculator::getStackElement(int stackId)
         cout << this->stacks[stackId][elementId] << endl
              << endl;
     }
-    catch (const exception &e)
+    catch (const exception &)
     {
         cerr << "Invalid ID specified!\n"
              << endl;
@@ -194,7 +239,7 @@ optional<int> PostfixCalculator::getValidatedStackId(const string &details)
 
         return stackId;
     }
-    catch (const exception &e)
+    catch (const exception &)
     {
         cerr << "Invalid ID specified!\n"
              << endl;

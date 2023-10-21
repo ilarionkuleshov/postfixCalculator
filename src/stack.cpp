@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include "stack.hpp"
 
@@ -20,9 +21,9 @@ Stack::Stack(const Stack &otherStack)
 double &Stack::operator[](size_t index)
 {
     if (index < this->elements.size())
-        return this->elements[this->elements.size() - 1 - index];
+        return this->elements[index];
     else
-        throw std::out_of_range("Index out of range");
+        throw out_of_range("Index out of range");
 }
 
 Stack &Stack::operator=(const Stack &otherStack)
@@ -35,6 +36,34 @@ Stack &Stack::operator=(const Stack &otherStack)
 vector<double> *Stack::operator->()
 {
     return &this->elements;
+}
+
+void Stack::saveToFile(string &filePath)
+{
+    ofstream outputFile(filePath);
+    if (!outputFile.is_open())
+        throw runtime_error("Cannot open file '" + filePath + "' for writing");
+
+    for (const double &element : this->elements)
+    {
+        outputFile << element << endl;
+    }
+    outputFile.close();
+}
+
+void Stack::loadFromFile(string &filePath)
+{
+    ifstream inputFile(filePath);
+    if (!inputFile.is_open())
+        throw runtime_error("Cannot open file '" + filePath + "' for reading");
+
+    this->clear();
+    double element;
+    while (inputFile >> element)
+    {
+        this->elements.push_back(element);
+    }
+    inputFile.close();
 }
 
 void Stack::clear()

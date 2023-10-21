@@ -15,6 +15,8 @@ public:
 
     void clear();
     void visualize();
+    void saveToFile(string &filePath);
+    void loadFromFile(string &filePath);
     void handle(const string &expression);
 
     double &operator[](size_t index);

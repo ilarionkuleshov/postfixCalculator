@@ -24,6 +24,7 @@ private:
     void removeStack();
     void operateStack();
     void equateStacks();
+    void saveOrLoadStack(int stackId, string &operation);
     void getStackElement(int stackId);
     optional<int> getValidatedStackId(const string &details);
 };
