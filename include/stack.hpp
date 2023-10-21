@@ -17,9 +17,10 @@ public:
     void visualize();
     void saveToFile(string &filePath);
     void loadFromFile(string &filePath);
+    void replace(int index, int replaceSize, Stack &replaceStack);
     void handle(const string &expression);
 
-    double &operator[](size_t index);
+    double &operator[](int index);
     Stack &operator=(const Stack &otherStack);
     vector<double> *operator->();
 

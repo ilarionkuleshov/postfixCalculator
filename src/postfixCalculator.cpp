@@ -33,6 +33,7 @@ int PostfixCalculator::run()
                  << "'n': Create new stack.\n"
                  << "'r': Remove specific stack.\n"
                  << "'e': Equate one stack to another.\n"
+                 << "'p': Replace part of the stack to another stack.\n"
                  << "'o': Choose specific stack to operate with.\n"
                  << endl;
         }
@@ -44,11 +45,68 @@ int PostfixCalculator::run()
             this->removeStack();
         else if (prompt == "e")
             this->equateStacks();
+        else if (prompt == "p")
+            this->replaceStackPart();
         else if (prompt == "o")
             this->operateStack();
     }
 
     return 0;
+}
+
+void PostfixCalculator::replaceStackPart()
+{
+    optional<int> stackId1 = this->getValidatedStackId("to which you want to replace the values");
+    if (!stackId1.has_value())
+        return;
+
+    cout << "Enter start index for replacing: ";
+
+    string rawIndex;
+    int index;
+    getline(cin, rawIndex);
+
+    try
+    {
+        index = stoi(rawIndex);
+    }
+    catch (const exception &)
+    {
+        cerr << "Invalid start index specified!\n"
+             << endl;
+    }
+
+    cout << "Enter replace size: ";
+
+    string rawReplaceSize;
+    int replaceSize;
+    getline(cin, rawReplaceSize);
+
+    try
+    {
+        replaceSize = stoi(rawReplaceSize);
+    }
+    catch (const exception &)
+    {
+        cerr << "Invalid replace size specified!\n"
+             << endl;
+    }
+
+    optional<int> stackId2 = this->getValidatedStackId("from which you want to take the values");
+    if (!stackId2.has_value())
+        return;
+
+    try
+    {
+        this->stacks[stackId1.value()].replace(index, replaceSize, this->stacks[stackId2.value()]);
+        cout << "Done!\n"
+             << endl;
+    }
+    catch (const exception &error)
+    {
+        cerr << error.what() << endl
+             << endl;
+    }
 }
 
 void PostfixCalculator::equateStacks()
@@ -95,6 +153,7 @@ void PostfixCalculator::operateStack()
                  << "'s': Save stack elements to file.\n"
                  << "'l': Load stack elements from file.\n"
                  << "'g': Get specific element of the current stack.\n"
+                 << "'u': Update specific element value of the current stack.\n"
                  << "<expression>: Handle <expression> for the current stack (numbers and operators).\n"
                  << endl;
         }
@@ -121,6 +180,8 @@ void PostfixCalculator::operateStack()
         }
         else if (prompt == "g")
             this->getStackElement(stackId.value());
+        else if (prompt == "u")
+            this->updateStackElement(stackId.value());
         else
         {
             this->stacks[stackId.value()].handle(prompt);
@@ -153,7 +214,8 @@ void PostfixCalculator::saveOrLoadStack(int stackId, string &operation)
     }
     catch (const runtime_error &error)
     {
-        cerr << error.what() << endl;
+        cerr << error.what() << endl
+             << endl;
     }
 }
 
@@ -175,6 +237,50 @@ void PostfixCalculator::getStackElement(int stackId)
         cerr << "Invalid ID specified!\n"
              << endl;
     }
+}
+
+void PostfixCalculator::updateStackElement(int stackId)
+{
+    int elementId;
+    double value;
+
+    cout << "Enter ID of the stack element to update: ";
+
+    string rawElementId;
+    getline(cin, rawElementId);
+
+    try
+    {
+        elementId = stoi(rawElementId);
+        this->stacks[stackId][elementId];
+    }
+    catch (const exception &)
+    {
+        cerr << "Invalid ID specified!\n"
+             << endl;
+        return;
+    }
+
+    cout << "Enter new value: ";
+
+    string rawValue;
+    getline(cin, rawValue);
+
+    try
+    {
+        value = stod(rawValue);
+    }
+    catch (const exception &)
+    {
+        cerr << "Invalid value specified!\n"
+             << endl;
+        return;
+    }
+
+    this->stacks[stackId][elementId] = value;
+
+    this->stacks[stackId].visualize();
+    cout << endl;
 }
 
 void PostfixCalculator::printStacks()

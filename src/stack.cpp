@@ -18,12 +18,22 @@ Stack::Stack(const Stack &otherStack)
     this->elements = otherStack.elements;
 }
 
-double &Stack::operator[](size_t index)
+double &Stack::operator[](int index)
 {
-    if (index < this->elements.size())
-        return this->elements[index];
-    else
+    if (index < 0 || index >= this->elements.size())
         throw out_of_range("Index out of range");
+    return this->elements[index];
+}
+
+void Stack::replace(int index, int replaceSize, Stack &replaceStack)
+{
+    if (index < 0 || index >= this->elements.size())
+        throw out_of_range("Index out of range");
+    if (replaceSize < 0 || replaceSize + index >= this->elements.size() || replaceSize != replaceStack->size())
+        throw invalid_argument("Invalid `replaceSize` provided");
+
+    for (int i = index; i < index + replaceSize; i++)
+        this->elements[i] = replaceStack[i - index];
 }
 
 Stack &Stack::operator=(const Stack &otherStack)
