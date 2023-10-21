@@ -24,6 +24,9 @@ public:
     Stack &operator=(const Stack &otherStack);
     vector<double> *operator->();
 
+    friend ostream &operator<<(ostream &output, const Stack &stack);
+    friend istream &operator>>(istream &input, Stack &stack);
+
 private:
     vector<double> elements;
 

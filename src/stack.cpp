@@ -48,16 +48,31 @@ vector<double> *Stack::operator->()
     return &this->elements;
 }
 
+ostream &operator<<(ostream &output, const Stack &stack)
+{
+    for (const double &element : stack.elements)
+        output << element << endl;
+    return output;
+}
+
+istream &operator>>(istream &input, Stack &stack)
+{
+    stack.clear();
+
+    double value;
+    while (input >> value)
+        stack->push_back(value);
+
+    return input;
+}
+
 void Stack::saveToFile(string &filePath)
 {
     ofstream outputFile(filePath);
     if (!outputFile.is_open())
         throw runtime_error("Cannot open file '" + filePath + "' for writing");
 
-    for (const double &element : this->elements)
-    {
-        outputFile << element << endl;
-    }
+    outputFile << *this;
     outputFile.close();
 }
 
@@ -67,12 +82,7 @@ void Stack::loadFromFile(string &filePath)
     if (!inputFile.is_open())
         throw runtime_error("Cannot open file '" + filePath + "' for reading");
 
-    this->clear();
-    double element;
-    while (inputFile >> element)
-    {
-        this->elements.push_back(element);
-    }
+    inputFile >> *this;
     inputFile.close();
 }
 
