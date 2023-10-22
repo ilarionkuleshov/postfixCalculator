@@ -4,7 +4,7 @@ set(SOURCES
     src/main.cpp
     src/postfixCalculator.cpp
 )
-set(HEADERSinclude/postfixCalculator.hpp)
+set(HEADERS include/postfixCalculator.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
