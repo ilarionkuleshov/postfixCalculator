@@ -66,7 +66,7 @@ istream &operator>>(istream &input, Stack &stack)
     return input;
 }
 
-void Stack::saveToFile(string &filePath)
+void Stack::saveToFile(const string &filePath)
 {
     ofstream outputFile(filePath);
     if (!outputFile.is_open())
@@ -76,7 +76,7 @@ void Stack::saveToFile(string &filePath)
     outputFile.close();
 }
 
-void Stack::loadFromFile(string &filePath)
+void Stack::loadFromFile(const string &filePath)
 {
     ifstream inputFile(filePath);
     if (!inputFile.is_open())

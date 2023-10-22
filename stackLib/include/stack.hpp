@@ -15,8 +15,8 @@ public:
 
     void clear();
     void visualize();
-    void saveToFile(string &filePath);
-    void loadFromFile(string &filePath);
+    void saveToFile(const string &filePath);
+    void loadFromFile(const string &filePath);
     void replace(int index, int replaceSize, Stack &replaceStack);
     void handle(const string &expression);
 
