@@ -10,11 +10,19 @@ cmake ..
 echo "Compiling the project..."
 make
 
-echo "Copying executable to bin/ directory..."
-executable_in_bin="../bin/postfixCalculator"
+executable_in_build="postfixCalculatorApp/postfixCalculatorApp"
+if [ -e "$executable_in_build" ]
+then
+    echo "Copying executable to bin/ directory..."
 
-if [ -e "$executable_in_bin" ]; then
-    rm "$executable_in_bin"
+    executable_in_bin="../bin/postfixCalculatorApp"
+    if [ -e "$executable_in_bin" ]
+    then
+        rm "$executable_in_bin"
+    fi
+
+    cp $executable_in_build $executable_in_bin
+
+else
+    echo "An error occurred during compilation"
 fi
-
-cp postfixCalculator $executable_in_bin
